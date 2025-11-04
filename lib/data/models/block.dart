@@ -50,5 +50,5 @@ class Block {
 
   @override
   String toString() =>
-      'Block(id:$id, val: $value, pos:$position, type:$type, merging:$isMerging';
+      'Block(id:$id, val: $value, pos:$position, type:$type, merging:$isMerging)';
 }

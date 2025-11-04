@@ -51,3 +51,6 @@ app.*.map.json
 /web/
 *.lock
 *.tmp
+linux/flutter/generated_plugin_registrant.cc
+macos/Flutter/GeneratedPluginRegistrant.swift
+linux/flutter/generated_plugins.cmake

@@ -1,54 +1,56 @@
+import 'package:flutter/cupertino.dart';
+import 'package:uuid/uuid.dart';
+import 'position.dart';
 import 'package:fallingfusion/core/enums/block_type.dart';
-import 'package:fallingfusion/data/models/position.dart';
-import 'package:flutter/foundation.dart';
 
 @immutable
 class Block {
-  final int id;
+  final String id;
   final int value;
   final Position position;
   final BlockType type;
   final bool isMerging;
-  final bool isExploding;
 
-  const Block({
-    required this.id,
+  Block({
+    String? id,
     required this.value,
     required this.position,
-    this.type = BlockType.normal,
+    required this.type,
     this.isMerging = false,
-    this.isExploding = false,
-  });
+  }) : id = id ?? const Uuid().v4();
 
-  Block moveTo(Position newPos) => copyWith(position: newPos);
+  Block moveTo(Position newPosition) {
+    return copyWith(position: newPosition);
+  }
 
   Block mergeWith(Block other) {
-    assert(position == other.position, 'Merge only allowed on same position');
-    return copyWith(
+    return Block(
+      id: const Uuid().v4(),
       value: value + other.value,
+      position: position,
+      type: type,
       isMerging: true,
     );
   }
 
   Block copyWith({
-    int? id,
+    String? id,
     int? value,
     Position? position,
     BlockType? type,
     bool? isMerging,
-    bool? isExploding,
+    bool preserveId = false,
   }) {
     return Block(
-        id: id ?? this.id,
-        value: value ?? this.value,
-        position: position ?? this.position,
-        type: type ?? this.type,
-        isMerging: isMerging ?? false,
-        isExploding: isExploding ?? false,
+      id: preserveId ? (id ?? this.id) : const Uuid().v4(),
+      value: value ?? this.value,
+      position: position ?? this.position,
+      type: type ?? this.type,
+      isMerging: isMerging ?? this.isMerging,
     );
   }
 
   @override
   String toString() =>
-      'Block(id:$id, val: $value, pos:$position, type:$type, merging:$isMerging)';
+      'Block(id: $id, value: $value, pos: ${position.x},${position.y}, type: $type)';
 }

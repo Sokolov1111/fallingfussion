@@ -19,8 +19,6 @@ class GameController extends StateNotifier<GameState> {
 
   Timer? _timer;
 
-  int _nextBlockId = 0;
-
   bool bombMode = false;
   BlockType selectedBombType = BlockType.bombSmall;
 
@@ -43,7 +41,6 @@ class GameController extends StateNotifier<GameState> {
 
     if (bombMode) {
       newBlock = Block(
-          id: _nextBlockId++,
           value: randomValue,
           position: Position(columns ~/ 2, 0),
           type: selectedBombType,
@@ -51,7 +48,6 @@ class GameController extends StateNotifier<GameState> {
       bombMode = false;
     } else {
       newBlock = Block(
-          id: _nextBlockId++,
           value: randomValue,
           position: Position(columns ~/ 2, 0),
           type: BlockType.normal,
@@ -75,7 +71,10 @@ class GameController extends StateNotifier<GameState> {
       _lockFallingBlock(falling);
     } else {
       state = state.copyWith(
-        fallingBlock: falling.moveTo(nextPos),
+        fallingBlock: falling.copyWith(
+          position: nextPos,
+          preserveId: true,
+        ),
       );
     }
   }
@@ -91,46 +90,65 @@ class GameController extends StateNotifier<GameState> {
   }
 
   void _lockFallingBlock(Block block) {
-    final blocks = List<Block>.from(state.blocks)..add(block);
+    state = state.copyWith(fallingBlock: null);
 
-    if (block.type != BlockType.normal) {
-      _activateBomb(block, blocks);
-    }
+    Future.microtask(() {
+      final updatedBlocks = List<Block>.from(state.blocks)..add(block);
 
-    state = state.copyWith(
-      blocks: blocks,
-      fallingBlock: null,
-    );
+      if (block.type != BlockType.normal) {
+        _activateBomb(block, updatedBlocks);
+      } else {
+        state = state.copyWith(
+          blocks: updatedBlocks,
+        );
+      }
 
-    _mergeBlocks();
+      _mergeBlocks();
+      _checkGameOver();
+      _spawnNewBlock();
+    });
   }
 
   void _mergeBlocks() {
     bool didMerge = false;
     final blocks = List<Block>.from(state.blocks);
 
+    blocks.sort((a, b) => b.position.y.compareTo(a.position.y));
+
     for (int i = 0; i < blocks.length; i++) {
       for (int j = i + 1; j < blocks.length; j++) {
         final a = blocks[i];
         final b = blocks[j];
 
-        if (a.value == b.value && a.position == b.position && a.type == BlockType.normal && b.type ==  BlockType.normal) {
-          final merged = a.mergeWith(b);
+        final isSameColumn = a.position.x == b.position.x;
+        final isAdjacentVertically =
+            (a.position.y - b.position.y).abs() == 1;
+
+        if (isSameColumn &&
+            isAdjacentVertically &&
+            a.value == b.value &&
+            a.type == BlockType.normal &&
+            b.type == BlockType.normal) {
+          final merged = a.copyWith(
+            value: a.value * 2,
+            preserveId: false,
+          );
+
           blocks.remove(a);
           blocks.remove(b);
           blocks.add(merged);
-          
+
           state = state.copyWith(score: state.score + merged.value);
-          
+
           didMerge = true;
           break;
         }
       }
       if (didMerge) break;
     }
-    
+
     state = state.copyWith(blocks: blocks);
-    
+
     if (didMerge) {
       _mergeBlocks();
     }
@@ -156,7 +174,9 @@ class GameController extends StateNotifier<GameState> {
 
     final newPos = Position(max(0, falling.position.x - 1), falling.position.y);
     if (!_isCollision(newPos)) {
-      state = state.copyWith(fallingBlock: falling.moveTo(newPos));
+      state = state.copyWith(
+        fallingBlock: falling.copyWith(position: newPos, preserveId: true)
+      );
     }
   }
 
@@ -166,7 +186,9 @@ class GameController extends StateNotifier<GameState> {
 
     final newPos = Position(min(columns - 1, falling.position.x + 1), falling.position.y);
     if (!_isCollision(newPos)) {
-      state = state.copyWith(fallingBlock: falling.moveTo(newPos));
+      state = state.copyWith(
+        fallingBlock: falling.copyWith(position: newPos, preserveId: true)
+      );
     }
   }
 

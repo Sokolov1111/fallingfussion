@@ -22,6 +22,9 @@ class GameController extends StateNotifier<GameState> {
   bool bombMode = false;
   BlockType selectedBombType = BlockType.bombSmall;
 
+  DateTime? _lastMoveTime;
+  final Duration moveCooldown = const Duration(milliseconds: 200);
+
   void _startGameLoop() {
     _timer = Timer.periodic(tickDuration, (_) {
       if (!state.isGameOver) {
@@ -169,6 +172,12 @@ class GameController extends StateNotifier<GameState> {
   }
 
   void moveLeft() {
+    final now = DateTime.now();
+    if (_lastMoveTime != null && now.difference(_lastMoveTime!) < moveCooldown) {
+      return;
+    }
+    _lastMoveTime = now;
+
     final falling = state.fallingBlock;
     if (falling == null) return;
 
@@ -181,6 +190,11 @@ class GameController extends StateNotifier<GameState> {
   }
 
   void moveRight() {
+    final now = DateTime.now();
+    if (_lastMoveTime != null && now.difference(_lastMoveTime!) < moveCooldown) {
+      return;
+    }
+    _lastMoveTime = now;
     final falling = state.fallingBlock;
     if (falling == null) return;
 

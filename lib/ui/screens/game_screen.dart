@@ -1,7 +1,7 @@
 import 'package:fallingfusion/core/enums/block_type.dart';
 import 'package:fallingfusion/logic/providers/game_provider.dart';
 import 'package:fallingfusion/ui/widgets/board_grid.dart';
-import 'package:fallingfusion/ui/widgets/bomb_button.dart';
+import 'package:fallingfusion/ui/widgets/bomb_cooldown_button.dart';
 import 'package:fallingfusion/ui/widgets/control_button.dart';
 import 'package:fallingfusion/ui/widgets/score_panel.dart';
 import 'package:flutter/material.dart';
@@ -48,16 +48,20 @@ class GameScreen extends ConsumerWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    BombButton(
+                    BombCooldownButton(
                       label: "Small bomb",
                       color: Colors.orangeAccent,
-                      onTap: () => controller.activateBombMode(BlockType.bombSmall),
+                      onReadyTap: () => controller.useBomb(BlockType.bombSmall),
+                      progress: controller.bombChargeProgress,
+                      isReady: controller.isBombReady,
                     ),
                     const SizedBox(width: 12,),
-                    BombButton(
+                    BombCooldownButton(
                       label: "Large bomb",
                       color: Colors.redAccent,
-                      onTap: () => controller.activateBombMode(BlockType.bombLarge),
+                      onReadyTap: () => controller.useBomb(BlockType.bombLarge),
+                      progress: controller.bombChargeProgress,
+                      isReady: controller.isBombReady,
                     ),
                   ],
                 ),

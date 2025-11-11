@@ -33,6 +33,10 @@ class GameController extends StateNotifier<GameState> {
   DateTime? _lastMoveTime;
   final Duration moveCooldown = const Duration(milliseconds: 200);
 
+  bool isPaused = false;
+  int countdown = 0;
+  Timer? _countdownTimer;
+
   void _startGameLoop() {
     _timer = Timer.periodic(tickDuration, (_) {
       if (!state.isGameOver) {
@@ -45,6 +49,34 @@ class GameController extends StateNotifier<GameState> {
     _timer?.cancel();
   }
 
+  void togglePause() {
+    if (!isPaused) {
+      isPaused = true;
+      stopGame();
+      state = state.copyWith();
+    } else {
+      _startCountdownBeforeResume();
+    }
+  }
+
+  void _startCountdownBeforeResume() {
+    countdown = 3;
+    state = state.copyWith();
+
+    _countdownTimer?.cancel();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      countdown--;
+      state = state.copyWith();
+
+      if (countdown <= 0) {
+        timer.cancel();
+        isPaused = false;
+        _startGameLoop();
+        state = state.copyWith();
+      }
+    });
+  }
+
   void _spawnNewBlock() {
     final randomValue = pow(
       2,
@@ -53,21 +85,13 @@ class GameController extends StateNotifier<GameState> {
 
     Block newBlock;
 
-    if (bombMode) {
-      newBlock = Block(
-        value: randomValue,
-        position: Position(columns ~/ 2, 0),
-        type: selectedBombType,
-      );
-      bombMode = false;
-    } else {
-      newBlock = Block(
-        value: randomValue,
-        position: Position(columns ~/ 2, 0),
-        type: BlockType.normal,
-      );
-    }
+    newBlock = Block(
+      value: randomValue,
+      position: Position(columns ~/ 2, 0),
+      type: bombMode ? selectedBombType : BlockType.normal,
+    );
 
+    bombMode = false;
     state = state.copyWith(fallingBlock: newBlock);
   }
 

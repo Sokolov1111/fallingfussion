@@ -28,7 +28,7 @@ class BoardGrid extends ConsumerWidget {
       height: GameConfig.boardHeight,
       decoration: BoxDecoration(
         color: AppColors.boardBackground,
-        border: Border.all(color: AppColors.boardBorder, width: 2),
+        border: Border.all(color: AppColors.boardBorder, width: 1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Stack(

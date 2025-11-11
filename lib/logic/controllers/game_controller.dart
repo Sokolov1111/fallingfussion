@@ -11,11 +11,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class GameController extends StateNotifier<GameState> {
   GameController() : super(GameState.initial()) {
     _startGameLoop();
+    _startBombCooldownTimer();
   }
 
   final int columns = 5;
   final int rows = 8;
   final Duration tickDuration = const Duration(milliseconds: 500);
+
+  static const Duration bombCooldown = Duration(minutes: 1);
+  DateTime _bombCooldownStart = DateTime.now();
+  Timer? _bombCooldownTimer;
+  double _bombChargeProgress = 0.0;
+  bool get isBombReady => _bombChargeProgress >= 1.0;
+  double get bombChargeProgress => _bombChargeProgress;
 
   Timer? _timer;
 
@@ -291,6 +299,32 @@ class GameController extends StateNotifier<GameState> {
     selectedBombType = type;
   }
 
+  void _startBombCooldownTimer() {
+    _bombCooldownStart = DateTime.now();
+    _bombChargeProgress = 0.0;
+
+    _bombCooldownTimer?.cancel();
+    _bombCooldownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      final elapsed = DateTime.now().difference(_bombCooldownStart);
+      final progress = elapsed.inMilliseconds / bombCooldown.inMilliseconds;
+
+      _bombChargeProgress = progress.clamp(0.0, 1.0);
+
+      state = state.copyWith();
+
+      if (_bombChargeProgress >= 1.0) {
+        _bombCooldownTimer?.cancel();
+      }
+    });
+  }
+
+  void useBomb(BlockType type) {
+    if (!isBombReady) return;
+
+    activateBombMode(type);
+    _startBombCooldownTimer();
+  }
+
   void _checkGameOver() {
     for (final block in state.blocks) {
       if (block.position.y == 0) {
@@ -299,6 +333,12 @@ class GameController extends StateNotifier<GameState> {
         return;
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _bombCooldownTimer?.cancel();
+    super.dispose();
   }
 }
 

@@ -2,6 +2,7 @@ import 'package:fallingfusion/core/enums/block_type.dart';
 import 'package:fallingfusion/logic/providers/game_provider.dart';
 import 'package:fallingfusion/ui/widgets/board_grid.dart';
 import 'package:fallingfusion/ui/widgets/bomb_button.dart';
+import 'package:fallingfusion/ui/widgets/control_button.dart';
 import 'package:fallingfusion/ui/widgets/score_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,6 +40,8 @@ class GameScreen extends ConsumerWidget {
                 ),
               ),
             ),
+
+            const ControlButtons(),
 
             Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),

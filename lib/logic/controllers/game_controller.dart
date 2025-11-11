@@ -216,6 +216,22 @@ class GameController extends StateNotifier<GameState> {
     }
   }
 
+  void dropFaster() {
+    final falling = state.fallingBlock;
+    if (falling == null) return;
+
+    Position nextPos = falling.position;
+    while (!_isCollision(nextPos.below())) {
+      nextPos = nextPos.below();
+    }
+
+    state = state.copyWith(
+      fallingBlock: falling.copyWith(position: nextPos, preserveId: true),
+    );
+
+    _lockFallingBlock(state.fallingBlock!);
+  }
+
   void activateBombMode(BlockType type) {
     bombMode = true;
     selectedBombType = type;

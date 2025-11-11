@@ -12,50 +12,46 @@ class BlockWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final double size = GameConfig.cellSize;
     final Color baseColor = _getBlockColor(block.value, block.type);
+    final isTripleMerge = block.value % 8 == 0;
 
     return AnimatedScale(
-      scale: block.isMerging ? 1.25 : 1.0,
-      duration: const Duration(milliseconds: 200),
+      scale: block.isMerging ? 1.5 : 1.0,
+      duration: Duration(milliseconds: isTripleMerge ? 500 : 300),
       curve: Curves.easeOutBack,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 500),
         curve: Curves.easeOutCubic,
         width: size,
         height: size,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: block.isMerging
-              ? baseColor.withOpacity(0.9)
-              : baseColor.withOpacity(0.8),
+              ? (isTripleMerge ? Colors.purpleAccent : Colors.amberAccent)
+              : baseColor,
           borderRadius: BorderRadius.circular(8),
           boxShadow: block.isMerging
               ? [
-            BoxShadow(
-              color: Colors.yellowAccent.withOpacity(0.7),
-              blurRadius: 16,
-              spreadRadius: 4,
-            )
-          ]
-              : [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.25),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            )
-          ],
+                  BoxShadow(
+                    color: isTripleMerge
+                        ? Colors.deepPurple.withOpacity(0.8)
+                        : Colors.yellowAccent.withOpacity(0.7),
+                    blurRadius: 18,
+                    spreadRadius: 4,
+                  ),
+                ]
+              : [],
         ),
-        child: Text(
-          block.value.toString(),
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: size * 0.4,
-            shadows: [
-              Shadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 4,
-              ),
-            ],
+        child: Center(
+          child: Text(
+            block.type == BlockType.normal ? block.value.toString() :  '💣',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: size * 0.4,
+              shadows: [
+                Shadow(color: Colors.black.withOpacity(0.3), blurRadius: 4),
+              ],
+            ),
           ),
         ),
       ),

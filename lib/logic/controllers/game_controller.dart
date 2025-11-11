@@ -301,3 +301,10 @@ class GameController extends StateNotifier<GameState> {
     }
   }
 }
+
+// ---DEBUG ONLY---
+extension GameControllerDebugExtensions on GameController {
+  void debugMergeBlocksForTest() {
+    _mergeBlocks();
+  }
+}

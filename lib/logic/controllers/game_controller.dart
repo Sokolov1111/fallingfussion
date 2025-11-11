@@ -135,6 +135,7 @@ class GameController extends StateNotifier<GameState> {
           final merged = a.copyWith(
             value: a.value * 2,
             preserveId: false,
+            isMerging: true,
           );
 
           blocks.remove(a);
@@ -153,7 +154,16 @@ class GameController extends StateNotifier<GameState> {
     state = state.copyWith(blocks: blocks);
 
     if (didMerge) {
+
+      Future.delayed(const Duration(milliseconds: 300), () {
+        final reset = state.blocks
+            .map((b) => b.isMerging ? b.copyWith(isMerging: false) : b)
+            .toList();
+        state = state.copyWith(blocks: reset);
+      });
       _mergeBlocks();
+    } else {
+      state = state.copyWith(blocks: blocks);
     }
   }
   

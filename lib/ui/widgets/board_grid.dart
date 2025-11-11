@@ -36,7 +36,7 @@ class BoardGrid extends ConsumerWidget {
         children: [
           for (final block in allBlocks)
             Positioned(
-              key: ValueKey(block.id),
+              key: ValueKey('${block.id}_${block.isMerging}'),
               top: block.position.y * GameConfig.cellSize,
               left: block.position.x * GameConfig.cellSize,
               child: BlockWidget(block: block),

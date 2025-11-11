@@ -88,4 +88,35 @@ void main() {
       controller.stopGame();
     });
   });
+
+  test('Three horizontal equal blocks merge into one central with value *4', () {
+    fakeAsync((async) {
+      final controller =  GameController();
+
+      final a = Block(value: 2, position: const Position(1, 5), type: BlockType.normal);
+      final b = Block(value: 2, position: const Position(2, 5), type: BlockType.normal);
+      final c = Block(value: 2, position: const Position(3, 5), type: BlockType.normal);
+
+      controller.state = controller.state.copyWith(
+        blocks: [a, b, c],
+        fallingBlock: null,
+      );
+
+      controller.debugMergeBlocksForTest();
+
+      async.elapse(const Duration(milliseconds: 600));
+
+      final blocks = controller.state.blocks;
+      expect(blocks.length, 1);
+      final merged = blocks.first;
+
+      expect(merged.value, 8);
+      expect(merged.position, const Position(2, 5));
+      expect(merged.isMerging, false);
+
+      expect(controller.state.score >= 8, true);
+
+      controller.stopGame();
+    });
+  });
 }

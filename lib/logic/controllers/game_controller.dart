@@ -49,6 +49,13 @@ class GameController extends StateNotifier<GameState> {
     _timer?.cancel();
   }
 
+  void restartGame() {
+    stopGame();
+    state = GameState.initial();
+    _startGameLoop();
+    _startBombCooldownTimer();
+  }
+
   void togglePause() {
     if (!isPaused) {
       isPaused = true;

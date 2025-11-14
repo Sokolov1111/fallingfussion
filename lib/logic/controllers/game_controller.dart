@@ -10,8 +10,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class GameController extends StateNotifier<GameState> {
   GameController() : super(GameState.initial()) {
-    _startGameLoop();
     _startBombCooldownTimer();
+    _startCountdown();
   }
 
   final int columns = 5;
@@ -62,11 +62,11 @@ class GameController extends StateNotifier<GameState> {
       stopGame();
       state = state.copyWith();
     } else {
-      _startCountdownBeforeResume();
+      _startCountdown(isResume: true);
     }
   }
 
-  void _startCountdownBeforeResume() {
+  void _startCountdown({bool isResume = false}) {
     countdown = 3;
     state = state.copyWith();
 
@@ -77,7 +77,12 @@ class GameController extends StateNotifier<GameState> {
 
       if (countdown <= 0) {
         timer.cancel();
-        isPaused = false;
+        countdown = 0;
+
+        if (isResume) {
+          isPaused = false;
+        }
+
         _startGameLoop();
         state = state.copyWith();
       }

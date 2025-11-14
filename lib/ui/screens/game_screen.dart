@@ -1,5 +1,6 @@
 import 'package:fallingfusion/core/enums/block_type.dart';
 import 'package:fallingfusion/logic/providers/game_provider.dart';
+import 'package:fallingfusion/ui/screens/main_menu_screen.dart';
 import 'package:fallingfusion/ui/widgets/board_grid.dart';
 import 'package:fallingfusion/ui/widgets/bomb_cooldown_button.dart';
 import 'package:fallingfusion/ui/widgets/control_button.dart';
@@ -9,6 +10,58 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class GameScreen extends ConsumerWidget {
   const GameScreen({super.key});
+
+  void _confirmExitToMenu(BuildContext context, WidgetRef ref) {
+    final controller = ref.read(gameControllerProvider.notifier);
+
+    if (!controller.isPaused) {
+      controller.togglePause();
+    }
+
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          backgroundColor: Colors.white70,
+          title: const Text(
+            'Exit to Main Menu',
+            style: TextStyle(color: Colors.black54),
+          ),
+          content: const Text(
+            "Are you sure you want to return to the main menu?",
+            style: TextStyle(color: Colors.black87),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  controller.togglePause();
+                },
+                child: const Text(
+                  "No",
+                  style: TextStyle(color: Colors.black87),
+                ),
+            ),
+            TextButton(
+              onPressed: () {
+                final controller = ref.read(gameControllerProvider.notifier);
+                controller.restartGame();
+
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const MainMenuScreen()),
+                );
+              },
+              child: const Text(
+                "Yes",
+                style: TextStyle(color: Colors.redAccent),
+              ),
+            ),
+          ],
+        ),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -22,8 +75,44 @@ class GameScreen extends ConsumerWidget {
           children: [
             Column(
               children: [
-                const SizedBox(height: 16),
-                ScorePanel(score: gameState.score),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        onTap: () => _confirmExitToMenu(context, ref),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.blueGrey[700],
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                blurRadius: 4,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: const Text(
+                            "Menu",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                      ScorePanel(score: gameState.score),
+                    ],
+                  ),
+                ),
+
                 Expanded(
                   child: Center(
                     child: GestureDetector(

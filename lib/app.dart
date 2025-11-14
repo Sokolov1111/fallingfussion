@@ -1,4 +1,5 @@
 import 'package:fallingfusion/ui/screens/game_screen.dart';
+import 'package:fallingfusion/ui/screens/main_menu_screen.dart';
 import 'package:flutter/material.dart';
 
 class FallingFusionApp extends StatelessWidget {
@@ -12,7 +13,7 @@ class FallingFusionApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.black,
       ),
       debugShowCheckedModeBanner: false,
-      home: const GameScreen(),
+      home: MainMenuScreen(),
     );
   }
 }

@@ -16,7 +16,6 @@ class GameController extends StateNotifier<GameState> {
 
   final int columns = 5;
   final int rows = 8;
-  //final Duration tickDuration = const Duration(milliseconds: 500);
 
   bool isFastDropping = false;
   final Duration normalTick = const Duration(milliseconds: 500);
@@ -84,6 +83,7 @@ class GameController extends StateNotifier<GameState> {
 
   void stopGame() {
     _timer?.cancel();
+    _bombCooldownTimer?.cancel();
   }
 
   void restartGame() {

@@ -16,7 +16,13 @@ class GameController extends StateNotifier<GameState> {
 
   final int columns = 5;
   final int rows = 8;
-  final Duration tickDuration = const Duration(milliseconds: 500);
+  //final Duration tickDuration = const Duration(milliseconds: 500);
+
+  bool isFastDropping = false;
+  final Duration normalTick = const Duration(milliseconds: 500);
+  final Duration fastTick = const Duration(milliseconds: 50);
+
+  Duration get tickDuration => isFastDropping ? fastTick : normalTick;
 
   static const Duration bombCooldown = Duration(minutes: 1);
   DateTime _bombCooldownStart = DateTime.now();
@@ -38,11 +44,42 @@ class GameController extends StateNotifier<GameState> {
   Timer? _countdownTimer;
 
   void _startGameLoop() {
+    _timer?.cancel();
     _timer = Timer.periodic(tickDuration, (_) {
-      if (!state.isGameOver) {
+      if (!state.isGameOver && !isPaused) {
         _dropTick();
       }
     });
+  }
+
+  void _restartGameLoopWithNewSpeed() {
+    _timer?.cancel();
+    _timer = Timer.periodic(
+        tickDuration,
+        (_) {
+          if (!state.isGameOver && !isPaused) {
+            _dropTick();
+          }
+        }
+    );
+  }
+
+  void setFastDrop(bool enable) {
+    if (enable == isFastDropping) return;
+
+    isFastDropping = enable;
+
+    _restartGameLoopWithNewSpeed();
+
+    final falling = state.fallingBlock;
+    if (falling != null) {
+      state = state.copyWith(
+        fallingBlock: falling.copyWith(
+          isFastDropping: enable,
+          preserveId: true,
+        )
+      );
+    }
   }
 
   void stopGame() {
@@ -51,9 +88,11 @@ class GameController extends StateNotifier<GameState> {
 
   void restartGame() {
     stopGame();
+    _countdownTimer?.cancel();
+    _bombChargeProgress = 0.0;
     state = GameState.initial();
-    _startGameLoop();
     _startBombCooldownTimer();
+    _startCountdown();
   }
 
   void togglePause() {
@@ -67,6 +106,10 @@ class GameController extends StateNotifier<GameState> {
   }
 
   void _startCountdown({bool isResume = false}) {
+    if (!isResume) {
+      isPaused = true;
+    }
+
     countdown = 3;
     state = state.copyWith();
 
@@ -79,9 +122,7 @@ class GameController extends StateNotifier<GameState> {
         timer.cancel();
         countdown = 0;
 
-        if (isResume) {
-          isPaused = false;
-        }
+        isPaused = false;
 
         _startGameLoop();
         state = state.copyWith();
@@ -101,6 +142,7 @@ class GameController extends StateNotifier<GameState> {
       value: randomValue,
       position: Position(columns ~/ 2, 0),
       type: bombMode ? selectedBombType : BlockType.normal,
+      isFastDropping: isFastDropping,
     );
 
     bombMode = false;
@@ -137,13 +179,14 @@ class GameController extends StateNotifier<GameState> {
   }
 
   void _lockFallingBlock(Block block) {
+    final blockToAdd = block.copyWith(isFastDropping: false, preserveId: true);
     state = state.copyWith(fallingBlock: null);
 
     Future.microtask(() {
-      final updatedBlocks = List<Block>.from(state.blocks)..add(block);
+      final updatedBlocks = List<Block>.from(state.blocks)..add(blockToAdd);
 
-      if (block.type != BlockType.normal) {
-        _activateBomb(block, updatedBlocks);
+      if (blockToAdd.type != BlockType.normal) {
+        _activateBomb(blockToAdd, updatedBlocks);
       } else {
         state = state.copyWith(blocks: updatedBlocks);
       }
@@ -314,21 +357,21 @@ class GameController extends StateNotifier<GameState> {
     }
   }
 
-  void dropFaster() {
-    final falling = state.fallingBlock;
-    if (falling == null) return;
-
-    Position nextPos = falling.position;
-    while (!_isCollision(nextPos.below())) {
-      nextPos = nextPos.below();
-    }
-
-    state = state.copyWith(
-      fallingBlock: falling.copyWith(position: nextPos, preserveId: true),
-    );
-
-    _lockFallingBlock(state.fallingBlock!);
-  }
+  // void dropFaster() {
+  //   final falling = state.fallingBlock;
+  //   if (falling == null) return;
+  //
+  //   Position nextPos = falling.position;
+  //   while (!_isCollision(nextPos.below())) {
+  //     nextPos = nextPos.below();
+  //   }
+  //
+  //   state = state.copyWith(
+  //     fallingBlock: falling.copyWith(position: nextPos, preserveId: true),
+  //   );
+  //
+  //   _lockFallingBlock(state.fallingBlock!);
+  // }
 
   void activateBombMode(BlockType type) {
     bombMode = true;
@@ -374,6 +417,8 @@ class GameController extends StateNotifier<GameState> {
   @override
   void dispose() {
     _bombCooldownTimer?.cancel();
+    _countdownTimer?.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 }

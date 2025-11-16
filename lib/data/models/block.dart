@@ -10,6 +10,7 @@ class Block {
   final Position position;
   final BlockType type;
   final bool isMerging;
+  final bool isFastDropping;
 
   Block({
     String? id,
@@ -17,6 +18,7 @@ class Block {
     required this.position,
     required this.type,
     this.isMerging = false,
+    this.isFastDropping = false,
   }) : id = id ?? const Uuid().v4();
 
   Block moveTo(Position newPosition) {
@@ -39,6 +41,7 @@ class Block {
     Position? position,
     BlockType? type,
     bool? isMerging,
+    bool? isFastDropping,
     bool preserveId = false,
   }) {
     return Block(
@@ -47,6 +50,7 @@ class Block {
       position: position ?? this.position,
       type: type ?? this.type,
       isMerging: isMerging ?? this.isMerging,
+      isFastDropping: isFastDropping ?? this.isFastDropping,
     );
   }
 

@@ -29,17 +29,23 @@ class BlockWidget extends StatelessWidget {
               ? (isTripleMerge ? Colors.purpleAccent : Colors.amberAccent)
               : baseColor,
           borderRadius: BorderRadius.circular(8),
-          boxShadow: block.isMerging
-              ? [
-                  BoxShadow(
-                    color: isTripleMerge
-                        ? Colors.deepPurple.withOpacity(0.8)
-                        : Colors.yellowAccent.withOpacity(0.7),
-                    blurRadius: 18,
-                    spreadRadius: 4,
-                  ),
-                ]
-              : [],
+          boxShadow: [
+            if (block.isMerging)
+              BoxShadow(
+                color: isTripleMerge
+                    ? Colors.deepPurple.withOpacity(0.8)
+                    : Colors.yellowAccent.withOpacity(0.7),
+                blurRadius: 18,
+                spreadRadius: 4,
+              ),
+            if (block.isFastDropping)
+              BoxShadow(
+                color: baseColor.withOpacity(0.7),
+                blurRadius: 40,
+                spreadRadius: 12,
+                offset: const Offset(0, 18), // тень смещена вниз — как хвост
+              ),
+          ],
         ),
         child: Center(
           child: Text(

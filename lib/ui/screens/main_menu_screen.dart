@@ -1,4 +1,5 @@
 import 'package:fallingfusion/ui/screens/game_screen.dart';
+import 'package:fallingfusion/ui/screens/rules_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -123,7 +124,18 @@ class _MainMenuScreenState extends State<MainMenuScreen>
                   ),
                   const SizedBox(height: 20),
                   _MenuButton(
-                    label: "Exit",
+                    label: "Rules",
+                    color: Colors.blueAccent,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const RulesScreen()),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  _MenuButton(
+                    label: "Leave",
                     color: Colors.redAccent,
                     onTap: _showExitDialog,
                   ),

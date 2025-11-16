@@ -1,4 +1,3 @@
-import 'package:fallingfusion/ui/screens/game_screen.dart';
 import 'package:fallingfusion/ui/screens/main_menu_screen.dart';
 import 'package:flutter/material.dart';
 

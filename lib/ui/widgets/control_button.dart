@@ -20,11 +20,7 @@ class ControlButtons extends ConsumerWidget {
             color: Colors.blueAccent,
           ),
           const SizedBox(width: 24),
-          _GameButton(
-            icon: Icons.arrow_downward_rounded,
-            onTap: controller.dropFaster,
-            color: Colors.greenAccent,
-          ),
+          _FastDropButton(controller: controller),
           const SizedBox(width: 24),
           _GameButton(
             icon: Icons.arrow_right_rounded,
@@ -94,6 +90,64 @@ class _GameButtonState extends State<_GameButton> {
             ],
           ),
           child: Icon(widget.icon, color: Colors.white, size: 60),
+        ),
+      ),
+    );
+  }
+}
+
+class _FastDropButton extends StatefulWidget {
+  final dynamic controller;
+
+  const _FastDropButton({required this.controller});
+
+  @override
+  State<_FastDropButton> createState() => _FastDropButtonState();
+}
+
+class _FastDropButtonState extends State<_FastDropButton> {
+  double _scale = 1.0;
+
+  void _handleDown(TapDownDetails d) {
+    setState(() => _scale = 1.7);
+    widget.controller.setFastDrop(true);
+  }
+
+  void _handleUp(TapUpDetails d) {
+    setState(() => _scale = 1.0);
+    widget.controller.setFastDrop(false);
+  }
+
+  void _handleCancel() {
+    setState(() => _scale = 1.0);
+    widget.controller.setFastDrop(false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: _handleDown,
+      onTapUp: _handleUp,
+      onTapCancel: _handleCancel,
+      child: AnimatedScale(
+        scale: _scale,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOutBack,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          decoration: BoxDecoration(
+            color: Colors.greenAccent.withOpacity(0.9),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.greenAccent.withOpacity(0.6),
+                blurRadius: 12,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: const Icon(Icons.arrow_downward_rounded,
+              color: Colors.white, size: 60),
         ),
       ),
     );

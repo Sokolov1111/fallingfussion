@@ -7,6 +7,7 @@ class GameState {
   final Block? fallingBlock;
   final int score;
   final bool isGameOver;
+  final bool isVictory;
   final int level;
 
   const GameState({
@@ -14,6 +15,7 @@ class GameState {
     this.fallingBlock,
     this.score = 0,
     this.isGameOver = false,
+    this.isVictory = false,
     this.level = 1,
   });
 
@@ -24,6 +26,7 @@ class GameState {
     Block? fallingBlock,
     int? score,
     bool? isGameOver,
+    bool? isVictory,
     int? level,
   }) {
     return GameState(
@@ -31,6 +34,7 @@ class GameState {
         fallingBlock: fallingBlock ?? this.fallingBlock,
         score: score ?? this.score,
         isGameOver: isGameOver ?? this.isGameOver,
+        isVictory: isVictory ?? this.isVictory,
         level: level ?? this.level,
     );
   }

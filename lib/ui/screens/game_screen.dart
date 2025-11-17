@@ -4,6 +4,7 @@ import 'package:fallingfusion/ui/screens/main_menu_screen.dart';
 import 'package:fallingfusion/ui/widgets/board_grid.dart';
 import 'package:fallingfusion/ui/widgets/bomb_cooldown_button.dart';
 import 'package:fallingfusion/ui/widgets/control_button.dart';
+import 'package:fallingfusion/ui/widgets/game_end_overlay.dart';
 import 'package:fallingfusion/ui/widgets/score_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,7 +17,6 @@ class GameScreen extends ConsumerStatefulWidget {
 }
 
 class _GameScreenState extends ConsumerState<GameScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -224,114 +224,41 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               ),
 
             if (gameState.isGameOver)
-              AnimatedOpacity(
-                opacity: 1,
-                duration: const Duration(milliseconds: 400),
-                child: Container(
-                  color: Colors.black87.withOpacity(0.85),
-                  alignment: Alignment.center,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        "Game Over",
-                        style: TextStyle(
-                          fontSize: 48,
-                          color: Colors.redAccent,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 2,
-                          shadows: [
-                            Shadow(color: Colors.black, blurRadius: 10),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        "Score: ${gameState.score}",
-                        style: const TextStyle(
-                          fontSize: 28,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 40),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _GameButton(
-                            label: "Restart",
-                            color: Colors.greenAccent,
-                            onTap: controller.restartGame,
-                          ),
-                          const SizedBox(width: 20),
-                          _GameButton(
-                            label: "Menu",
-                            color: Colors.blueGrey,
-                            onTap: () {
-                              final controller = ref.read(
-                                gameControllerProvider.notifier,
-                              );
-                              controller.stopGame();
+              GameEndOverlay(
+                title: "Game Over",
+                titleColor: Colors.redAccent,
+                score: gameState.score,
+                onRestart: controller.restartGame,
+                onMenu: () {
+                  final controller = ref.read(gameControllerProvider.notifier);
+                  controller.stopGame();
 
-                              Navigator.pop(context);
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const MainMenuScreen(),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+                  Navigator.pop(context);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const MainMenuScreen()),
+                  );
+                },
+              ),
+
+            if (gameState.isVictory)
+              GameEndOverlay(
+                title: "VICTORY!",
+                titleColor: Colors.amberAccent,
+                score: gameState.score,
+                onRestart: controller.restartGame,
+                onMenu: () {
+                  final controller = ref.read(gameControllerProvider.notifier);
+                  controller.stopGame();
+
+                  Navigator.pop(context);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const MainMenuScreen()),
+                  );
+                },
               ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _GameButton extends StatelessWidget {
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _GameButton({
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.9),
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.4),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Text(
-          label,
-          style: const TextStyle(
-            fontSize: 18,
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1,
-          ),
         ),
       ),
     );

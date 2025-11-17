@@ -307,6 +307,13 @@ class GameController extends StateNotifier<GameState> {
       });
       Future.delayed(const Duration(milliseconds: 400), _mergeBlocks);
     }
+
+    bool contains2048 = blocks.any((b) => b.value >= 2048);
+    if (contains2048 && !state.isVictory) {
+      stopGame();
+      state = state.copyWith(isVictory: true, fallingBlock: null);
+      return;
+    }
   }
 
   void _activateBomb(Block bomb, List<Block> blockList) {

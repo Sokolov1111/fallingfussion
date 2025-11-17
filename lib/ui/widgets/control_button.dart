@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fallingfusion/logic/providers/game_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -50,27 +52,47 @@ class _GameButton extends StatefulWidget {
 
 class _GameButtonState extends State<_GameButton> {
   double _scale = 1.0;
+  Timer? _holdTimer;
+
+  void _startHold() {
+    _holdTimer?.cancel();
+    _holdTimer = Timer.periodic(const Duration(milliseconds: 120), (_) {
+      widget.onTap();
+    });
+  }
+
+  void _stopHold() {
+    _holdTimer?.cancel();
+    _holdTimer = null;
+  }
 
   void _onTapDown(TapDownDetails details) {
     setState(() => _scale = 2);
+    widget.onTap();
+    _startHold();
   }
 
   void _onTapUp(TapUpDetails details) {
     setState(() => _scale = 1.0);
+    _stopHold();
   }
 
   void _onTapCancel() {
     setState(() => _scale = 1.0);
+    _stopHold();
+  }
+
+  @override
+  void dispose() {
+    _holdTimer?.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTapDown: _onTapDown,
-      onTapUp: (d) {
-        _onTapUp(d);
-        widget.onTap();
-      },
+      onTapUp: _onTapUp,
       onTapCancel: _onTapCancel,
       child: AnimatedScale(
         scale: _scale,

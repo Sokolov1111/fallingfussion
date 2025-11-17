@@ -119,4 +119,34 @@ void main() {
       controller.stopGame();
     });
   });
+
+  test('Victory triggers when block reaches 2048', () {
+    fakeAsync((async) {
+      final controller = GameController();
+
+      final a = Block(value: 512, position: const Position(1, 5), type: BlockType.normal);
+      final b = Block(value: 512, position: const Position(2, 5), type: BlockType.normal);
+      final c = Block(value: 512, position: const Position(3, 5), type: BlockType.normal);
+
+      controller.state = controller.state.copyWith(
+        blocks: [a, b, c],
+        fallingBlock: null,
+      );
+
+      controller.debugMergeBlocksForTest();
+      async.flushMicrotasks();
+
+      async.elapse(const Duration(milliseconds: 750));
+      async.flushMicrotasks();
+
+      async.elapse(const Duration(milliseconds: 400));
+      async.flushMicrotasks();
+
+      expect(controller.state.isVictory, true);
+      expect(controller.state.blocks.any((b) => b.value >= 2048), true);
+
+      controller.stopGame();
+    });
+  });
+
 }

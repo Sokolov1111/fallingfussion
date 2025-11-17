@@ -8,8 +8,22 @@ import 'package:fallingfusion/ui/widgets/score_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class GameScreen extends ConsumerWidget {
+class GameScreen extends ConsumerStatefulWidget {
   const GameScreen({super.key});
+
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() => _GameScreenState();
+}
+
+class _GameScreenState extends ConsumerState<GameScreen> {
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(gameControllerProvider.notifier).restartGame();
+    });
+  }
 
   void _confirmExitToMenu(BuildContext context, WidgetRef ref) {
     final controller = ref.read(gameControllerProvider.notifier);
@@ -19,52 +33,46 @@ class GameScreen extends ConsumerWidget {
     }
 
     showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          backgroundColor: Colors.white70,
-          title: const Text(
-            'Exit to Main Menu',
-            style: TextStyle(color: Colors.black54),
-          ),
-          content: const Text(
-            "Are you sure you want to return to the main menu?",
-            style: TextStyle(color: Colors.black87),
-          ),
-          actions: [
-            TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  controller.togglePause();
-                },
-                child: const Text(
-                  "No",
-                  style: TextStyle(color: Colors.black87),
-                ),
-            ),
-            TextButton(
-              onPressed: () {
-                final controller = ref.read(gameControllerProvider.notifier);
-                controller.restartGame();
-
-                Navigator.pop(context);
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const MainMenuScreen()),
-                );
-              },
-              child: const Text(
-                "Yes",
-                style: TextStyle(color: Colors.redAccent),
-              ),
-            ),
-          ],
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white70,
+        title: const Text(
+          'Exit to Main Menu',
+          style: TextStyle(color: Colors.black54),
         ),
+        content: const Text(
+          "Are you sure you want to return to the main menu?",
+          style: TextStyle(color: Colors.black87),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              controller.togglePause();
+            },
+            child: const Text("No", style: TextStyle(color: Colors.black87)),
+          ),
+          TextButton(
+            onPressed: () {
+              final controller = ref.read(gameControllerProvider.notifier);
+              controller.stopGame();
+
+              Navigator.pop(context);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const MainMenuScreen()),
+              );
+            },
+            child: const Text("Yes", style: TextStyle(color: Colors.redAccent)),
+          ),
+        ],
+      ),
     );
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final gameState = ref.watch(gameControllerProvider);
     final controller = ref.read(gameControllerProvider.notifier);
 
@@ -76,7 +84,10 @@ class GameScreen extends ConsumerWidget {
             Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -141,7 +152,8 @@ class GameScreen extends ConsumerWidget {
                       BombCooldownButton(
                         label: "Small bomb",
                         color: Colors.orangeAccent,
-                        onReadyTap: () => controller.useBomb(BlockType.bombSmall),
+                        onReadyTap: () =>
+                            controller.useBomb(BlockType.bombSmall),
                         progress: controller.bombChargeProgress,
                         isReady: controller.isBombReady,
                       ),
@@ -151,7 +163,9 @@ class GameScreen extends ConsumerWidget {
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 18),
+                            vertical: 12,
+                            horizontal: 18,
+                          ),
                           decoration: BoxDecoration(
                             color: controller.isPaused
                                 ? Colors.greenAccent.withOpacity(0.8)
@@ -180,7 +194,8 @@ class GameScreen extends ConsumerWidget {
                       BombCooldownButton(
                         label: "Large bomb",
                         color: Colors.redAccent,
-                        onReadyTap: () => controller.useBomb(BlockType.bombLarge),
+                        onReadyTap: () =>
+                            controller.useBomb(BlockType.bombLarge),
                         progress: controller.bombChargeProgress,
                         isReady: controller.isBombReady,
                       ),
@@ -202,9 +217,7 @@ class GameScreen extends ConsumerWidget {
                       fontSize: 120,
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      shadows: [
-                        Shadow(color: Colors.black, blurRadius: 10),
-                      ],
+                      shadows: [Shadow(color: Colors.black, blurRadius: 10)],
                     ),
                   ),
                 ),
@@ -232,7 +245,7 @@ class GameScreen extends ConsumerWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 20,),
+                      const SizedBox(height: 20),
                       Text(
                         "Score: ${gameState.score}",
                         style: const TextStyle(
@@ -241,7 +254,7 @@ class GameScreen extends ConsumerWidget {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(height: 40,),
+                      const SizedBox(height: 40),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -250,11 +263,24 @@ class GameScreen extends ConsumerWidget {
                             color: Colors.greenAccent,
                             onTap: controller.restartGame,
                           ),
-                          const SizedBox(width: 20,),
+                          const SizedBox(width: 20),
                           _GameButton(
                             label: "Menu",
                             color: Colors.blueGrey,
-                            onTap: () {},
+                            onTap: () {
+                              final controller = ref.read(
+                                gameControllerProvider.notifier,
+                              );
+                              controller.stopGame();
+
+                              Navigator.pop(context);
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const MainMenuScreen(),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -277,7 +303,7 @@ class _GameButton extends StatelessWidget {
   const _GameButton({
     required this.label,
     required this.color,
-    required this.onTap
+    required this.onTap,
   });
 
   @override
@@ -311,4 +337,3 @@ class _GameButton extends StatelessWidget {
     );
   }
 }
-

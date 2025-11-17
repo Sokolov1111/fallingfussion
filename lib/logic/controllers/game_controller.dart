@@ -10,8 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class GameController extends StateNotifier<GameState> {
   GameController() : super(GameState.initial()) {
-    _startBombCooldownTimer();
-    _startCountdown();
+    restartGame();
   }
 
   final int columns = 5;
@@ -84,13 +83,24 @@ class GameController extends StateNotifier<GameState> {
   void stopGame() {
     _timer?.cancel();
     _bombCooldownTimer?.cancel();
+    _countdownTimer?.cancel();
   }
 
   void restartGame() {
-    stopGame();
+    _timer?.cancel();
     _countdownTimer?.cancel();
+    _countdownTimer?.cancel();
+
+    isPaused = false;
+    isFastDropping = false;
+    countdown = 0;
     _bombChargeProgress = 0.0;
+    bombMode = false;
+    selectedBombType = BlockType.bombSmall;
+    _lastMoveTime = null;
+
     state = GameState.initial();
+
     _startBombCooldownTimer();
     _startCountdown();
   }
@@ -356,22 +366,6 @@ class GameController extends StateNotifier<GameState> {
       );
     }
   }
-
-  // void dropFaster() {
-  //   final falling = state.fallingBlock;
-  //   if (falling == null) return;
-  //
-  //   Position nextPos = falling.position;
-  //   while (!_isCollision(nextPos.below())) {
-  //     nextPos = nextPos.below();
-  //   }
-  //
-  //   state = state.copyWith(
-  //     fallingBlock: falling.copyWith(position: nextPos, preserveId: true),
-  //   );
-  //
-  //   _lockFallingBlock(state.fallingBlock!);
-  // }
 
   void activateBombMode(BlockType type) {
     bombMode = true;

@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:fallingfusion/core/constants/app_colors.dart';
 import 'package:fallingfusion/core/constants/game_config.dart';
 import 'package:fallingfusion/data/models/block.dart';
@@ -17,6 +18,13 @@ class BoardGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final paddingHorizontal = 16.0 * 2;
+    final maxWidth = MediaQuery.of(context).size.width - paddingHorizontal;
+    final maxHeight = MediaQuery.of(context).size.height * 0.6;
+    final cellWidth = maxWidth / GameConfig.columns;
+    final cellHeight = maxHeight / GameConfig.rows;
+    final cellSize = min(cellWidth, cellHeight);
+
     final allBlocks = [...blocks];
     if (fallingBlock != null) allBlocks.add(fallingBlock!);
     if (allBlocks.map((b) => b.id).toSet().length != allBlocks.length) {
@@ -24,8 +32,8 @@ class BoardGrid extends ConsumerWidget {
     }
 
     return Container(
-      width: GameConfig.boardWidth,
-      height: GameConfig.boardHeight,
+      width: GameConfig.columns * cellSize,
+      height: GameConfig.rows * cellSize,
       decoration: BoxDecoration(
         color: AppColors.boardBackground,
         border: Border.all(color: AppColors.boardBorder, width: 1),
@@ -37,9 +45,9 @@ class BoardGrid extends ConsumerWidget {
           for (final block in allBlocks)
             Positioned(
               key: ValueKey('${block.id}_${block.isMerging}'),
-              top: block.position.y * GameConfig.cellSize,
-              left: block.position.x * GameConfig.cellSize,
-              child: BlockWidget(block: block),
+              top: block.position.y * cellSize,
+              left: block.position.x * cellSize,
+              child: BlockWidget(block: block, cellSize: cellSize,),
             ),
         ],
       ),

@@ -1,16 +1,15 @@
-import 'package:fallingfusion/core/constants/game_config.dart';
 import 'package:flutter/material.dart';
 import 'package:fallingfusion/data/models/block.dart';
 import 'package:fallingfusion/core/enums/block_type.dart';
 
 class BlockWidget extends StatelessWidget {
   final Block block;
+  final double cellSize;
 
-  const BlockWidget({super.key, required this.block});
+  const BlockWidget({super.key, required this.block, required this.cellSize});
 
   @override
   Widget build(BuildContext context) {
-    final double size = GameConfig.cellSize;
     final Color baseColor = _getBlockColor(block.value, block.type);
     final isTripleMerge = block.value % 8 == 0;
 
@@ -21,41 +20,44 @@ class BlockWidget extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeOutCubic,
-        width: size,
-        height: size,
+        width: cellSize,
+        height: cellSize,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: block.isMerging
               ? (isTripleMerge ? Colors.purpleAccent : Colors.amberAccent)
               : baseColor,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(cellSize * 0.18),
           boxShadow: [
             if (block.isMerging)
               BoxShadow(
                 color: isTripleMerge
                     ? Colors.deepPurple.withOpacity(0.8)
                     : Colors.yellowAccent.withOpacity(0.7),
-                blurRadius: 18,
-                spreadRadius: 4,
+                blurRadius: cellSize * 0.3,
+                spreadRadius: cellSize * 0.06,
               ),
             if (block.isFastDropping)
               BoxShadow(
                 color: baseColor.withOpacity(0.7),
-                blurRadius: 40,
-                spreadRadius: 12,
-                offset: const Offset(0, 18), // тень смещена вниз — как хвост
+                blurRadius: cellSize * 0.6,
+                spreadRadius: cellSize * 0.18,
+                offset: Offset(
+                  0,
+                  cellSize * 0.25,
+                ),
               ),
           ],
         ),
         child: Center(
           child: Text(
-            block.type == BlockType.normal ? block.value.toString() :  '💣',
+            block.type == BlockType.normal ? block.value.toString() : '💣',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
-              fontSize: size * 0.4,
+              fontSize: cellSize * 0.4,
               shadows: [
-                Shadow(color: Colors.black.withOpacity(0.3), blurRadius: 4),
+                Shadow(color: Colors.black.withOpacity(0.3), blurRadius: cellSize * 0.06),
               ],
             ),
           ),

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-
 import 'package:fallingfusion/core/constants/game_config.dart';
 import 'package:fallingfusion/core/enums/block_type.dart';
 import 'package:fallingfusion/data/models/block.dart';
@@ -44,7 +43,7 @@ class GameController extends StateNotifier<GameState> {
   void _startGameLoop() {
     _timer?.cancel();
     _timer = Timer.periodic(tickDuration, (_) {
-      if (!state.isGameOver && !isPaused) {
+      if (!state.isGameOver && !isPaused && !state.isVictory) {
         _dropTick();
       }
     });
@@ -55,7 +54,7 @@ class GameController extends StateNotifier<GameState> {
     _timer = Timer.periodic(
         tickDuration,
         (_) {
-          if (!state.isGameOver && !isPaused) {
+          if (!state.isGameOver && !isPaused && !state.isVictory) {
             _dropTick();
           }
         }

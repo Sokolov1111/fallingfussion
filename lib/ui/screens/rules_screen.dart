@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:fallingfusion/core/constants/rules_texts.dart';
 import 'package:fallingfusion/core/enums/block_type.dart';
 import 'package:fallingfusion/data/models/block.dart';
@@ -19,6 +20,10 @@ class _RulesScreenState extends State<RulesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double maxWidth = MediaQuery.of(context).size.width - 32;
+    final double cellSize = min(maxWidth / 6, 66);
+    final double iconSize = cellSize * 0.6;
+
     return Scaffold(
       backgroundColor: const Color(0xFF111111),
       appBar: AppBar(
@@ -58,16 +63,16 @@ class _RulesScreenState extends State<RulesScreen> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white70,
-                fontSize: 14,
+                fontSize: max(12, cellSize * 0.2),
                 fontStyle: FontStyle.italic,
               ),
             ),
             const SizedBox(height: 16),
-            _section(texts.section1Title, texts.section1Text, _mergeExample()),
+            _section(texts.section1Title, texts.section1Text, _mergeExample(cellSize), iconSize),
             const SizedBox(height: 32),
-            _section(texts.section2Title, texts.section2Text, _tripleMergeExample()),
+            _section(texts.section2Title, texts.section2Text, _tripleMergeExample(cellSize), iconSize),
             const SizedBox(height: 32),
-            _section(texts.section3Title, texts.section3Text, _bombExample()),
+            _section(texts.section3Title, texts.section3Text, _bombExample(cellSize), iconSize),
             const SizedBox(height: 50),
           ],
         ),
@@ -75,11 +80,11 @@ class _RulesScreenState extends State<RulesScreen> {
     );
   }
 
-  Widget _section(String title, String text, Widget example) {
+  Widget _section(String title, String text, Widget example, double iconSize) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _sectionTitle(title),
+        _sectionTitle(title, iconSize),
         const SizedBox(height: 8,),
         _sectionText(text),
         const SizedBox(height: 12,),
@@ -88,10 +93,10 @@ class _RulesScreenState extends State<RulesScreen> {
     );
   }
 
-  Widget _sectionTitle(String text) {
+  Widget _sectionTitle(String text, double iconSize) {
     return Row(
       children: [
-        const Icon(Icons.bolt, color: Colors.amber, size: 20),
+        Icon(Icons.bolt, color: Colors.amber, size: iconSize),
         const SizedBox(width: 8),
         Text(
           text,
@@ -112,7 +117,7 @@ class _RulesScreenState extends State<RulesScreen> {
     );
   }
 
-  Widget _mergeExample() {
+  Widget _mergeExample(double cellSize) {
     final blockA = Block(
       value: 16,
       type: BlockType.normal,
@@ -132,20 +137,20 @@ class _RulesScreenState extends State<RulesScreen> {
     return _exampleRow([
       Column(
         children: [
-          BlockWidget(block: blockA),
+          BlockWidget(block: blockA, cellSize: cellSize,),
           const Icon(
             Icons.keyboard_double_arrow_down_sharp,
             color: Colors.white,
           ),
-          BlockWidget(block: blockB),
+          BlockWidget(block: blockB, cellSize: cellSize,),
         ],
       ),
       const Icon(Icons.arrow_forward, color: Colors.white),
-      BlockWidget(block: result),
+      BlockWidget(block: result, cellSize: cellSize,),
     ]);
   }
 
-  Widget _tripleMergeExample() {
+  Widget _tripleMergeExample(double cellSize) {
     final b1 = Block(
       value: 2,
       type: BlockType.normal,
@@ -168,15 +173,15 @@ class _RulesScreenState extends State<RulesScreen> {
     );
 
     return _exampleRow([
-      BlockWidget(block: b1),
-      BlockWidget(block: b2),
-      BlockWidget(block: b3),
+      BlockWidget(block: b1, cellSize: cellSize,),
+      BlockWidget(block: b2, cellSize: cellSize,),
+      BlockWidget(block: b3, cellSize: cellSize,),
       const Icon(Icons.arrow_forward, color: Colors.white),
-      BlockWidget(block: res),
+      BlockWidget(block: res, cellSize: cellSize,),
     ]);
   }
 
-  Widget _bombExample() {
+  Widget _bombExample(double cellSize) {
     final b1 = Block(
       value: 2,
       type: BlockType.bombSmall,
@@ -193,9 +198,9 @@ class _RulesScreenState extends State<RulesScreen> {
         Text(texts.bombSmallLabel, style: TextStyle(fontWeight: FontWeight.bold),),
         const Icon(Icons.keyboard_double_arrow_right_outlined, color: Colors.white),
         const SizedBox(width: 4,),
-        BlockWidget(block: b1),
+        BlockWidget(block: b1, cellSize: cellSize,),
         const SizedBox(width: 24),
-        BlockWidget(block: b2),
+        BlockWidget(block: b2, cellSize: cellSize,),
         const SizedBox(width: 4),
         const Icon(Icons.keyboard_double_arrow_left_outlined, color: Colors.white),
         Text(texts.bombLargeLabel, style: TextStyle(fontWeight: FontWeight.bold),),
